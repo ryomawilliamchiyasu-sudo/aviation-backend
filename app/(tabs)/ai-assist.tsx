@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import OpenAI from 'openai';
-
-const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
+import { BACKEND_URL } from '../../config';
 
 export default function AIAssist() {
   const [prompt, setPrompt] = useState('');
@@ -16,25 +14,24 @@ export default function AIAssist() {
       return;
     }
 
-    if (!OPENAI_API_KEY) {
-      setError('OpenAI API key not configured. Set EXPO_PUBLIC_OPENAI_API_KEY in .env');
-      return;
-    }
-
     setLoading(true);
     setError('');
     setResponse('');
 
     try {
-      const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-      const res = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 500,
+      const res = await fetch(`${BACKEND_URL}/ai/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
       });
 
-      const content = res.choices[0]?.message?.content || 'No response';
-      setResponse(content);
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to get AI response');
+      }
+
+      const data = await res.json();
+      setResponse(data.response);
       setPrompt('');
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
