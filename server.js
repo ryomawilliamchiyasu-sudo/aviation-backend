@@ -14,6 +14,30 @@ app.use(express.json());
 app.use('/api/airports', airportRoutes);
 app.use('/api/weather', weatherRoutes);
 
+// Root route - API info
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Aviation Backend API',
+    version: '1.0.0',
+    status: 'online',
+    endpoints: {
+      airports: {
+        search: 'GET /api/airports/search?q=query',
+        byICAO: 'GET /api/airports/:icao',
+        byProvince: 'GET /api/airports/province/:code',
+        all: 'GET /api/airports'
+      },
+      weather: {
+        metar: 'GET /api/weather/metar/:icao',
+        taf: 'GET /api/weather/taf/:icao',
+        combined: 'GET /api/weather/:icao'
+      },
+      ai: 'POST /ai/ask',
+      health: 'GET /test'
+    }
+  });
+});
+
 app.get('/test', (_req, res) => {
   res.json({ ok: true, message: 'API alive' });
 });
