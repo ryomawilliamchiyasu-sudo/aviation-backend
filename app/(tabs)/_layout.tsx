@@ -9,7 +9,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="ai-assist" options={{ title: 'AI Assist' }} />
-      <Tabs.Screen name="maps" options={{ title: 'Maps' }} />
+      <Tabs.Screen name="maps" options={{ title: 'Maps', headerShown: false }} />
       <Tabs.Screen name="weather" options={{ title: 'Weather' }} />
       <Tabs.Screen name="airport-plan" options={{ title: 'Airport Plan' }} />
       <Tabs.Screen name="other" options={{ title: 'Other' }} />
