@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const airportRoutes = require('./src/routes/airportRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,27 +9,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const airports = [
-  { id: 1, code: 'CYYZ', name: 'Toronto Pearson Intl', lat: 43.6777, lon: -79.6248 },
-  { id: 2, code: 'CYVR', name: 'Vancouver Intl', lat: 49.1951, lon: -123.1779 },
-  { id: 3, code: 'CYYC', name: 'Calgary Intl', lat: 51.1225, lon: -114.0136 },
-];
+// Mount routes
+app.use('/api/airports', airportRoutes);
 
 app.get('/test', (_req, res) => {
   res.json({ ok: true, message: 'API alive' });
-});
-
-app.get('/airports', (_req, res) => {
-  res.json(airports);
-});
-
-app.get('/airports/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const airport = airports.find((a) => a.id === id);
-  if (!airport) {
-    return res.status(404).json({ error: 'Airport not found' });
-  }
-  res.json(airport);
 });
 
 app.get('/weather', (req, res) => {

@@ -1,0 +1,343 @@
+{
+  "airports": [
+    {
+      "icao": "CYYZ",
+      "iata": "YYZ",
+      "name": "Toronto Pearson International Airport",
+      "city": "Toronto",
+      "province": "ON",
+      "country": "CA",
+      "latitude": 43.6772,
+      "longitude": -79.6306,
+      "elevation": 567,
+      "elevationFeet": 1860,
+      "timezone": "EST",
+      "type": "public",
+      "runways": [
+        {
+          "designation": "06L/24R",
+          "length": 4002,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "06R/24L",
+          "length": 3352,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "15L/33R",
+          "length": 3353,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "15R/33L",
+          "length": 3352,
+          "width": 61,
+          "surface": "Asphalt"
+        }
+      ],
+      "frequencies": [
+        {
+          "type": "ATIS",
+          "frequency": "128.75"
+        },
+        {
+          "type": "Ground",
+          "frequency": "121.75"
+        },
+        {
+          "type": "Tower",
+          "frequency": "118.10"
+        },
+        {
+          "type": "Approach",
+          "frequency": "119.00"
+        }
+      ],
+      "services": [
+        "FBO",
+        "Fuel",
+        "Maintenance",
+        "Hangar",
+        "Restaurant",
+        "Hotel"
+      ]
+    },
+    {
+      "icao": "CYVR",
+      "iata": "YVR",
+      "name": "Vancouver International Airport",
+      "city": "Vancouver",
+      "province": "BC",
+      "country": "CA",
+      "latitude": 49.1951,
+      "longitude": -123.1779,
+      "elevation": 5,
+      "elevationFeet": 16,
+      "timezone": "PST",
+      "type": "public",
+      "runways": [
+        {
+          "designation": "08L/26R",
+          "length": 3657,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "08R/26L",
+          "length": 3658,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "12/30",
+          "length": 2896,
+          "width": 46,
+          "surface": "Asphalt"
+        }
+      ],
+      "frequencies": [
+        {
+          "type": "ATIS",
+          "frequency": "135.50"
+        },
+        {
+          "type": "Ground",
+          "frequency": "121.75"
+        },
+        {
+          "type": "Tower",
+          "frequency": "118.10"
+        },
+        {
+          "type": "Approach",
+          "frequency": "119.30"
+        }
+      ],
+      "services": [
+        "FBO",
+        "Fuel",
+        "Maintenance",
+        "Hangar",
+        "Restaurant",
+        "Hotel"
+      ]
+    },
+    {
+      "icao": "CYYC",
+      "iata": "YYC",
+      "name": "Calgary International Airport",
+      "city": "Calgary",
+      "province": "AB",
+      "country": "CA",
+      "latitude": 51.1225,
+      "longitude": -114.0136,
+      "elevation": 1084,
+      "elevationFeet": 3557,
+      "timezone": "MST",
+      "type": "public",
+      "runways": [
+        {
+          "designation": "01/19",
+          "length": 3657,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "16/34",
+          "length": 4000,
+          "width": 61,
+          "surface": "Asphalt"
+        }
+      ],
+      "frequencies": [
+        {
+          "type": "ATIS",
+          "frequency": "126.05"
+        },
+        {
+          "type": "Ground",
+          "frequency": "121.75"
+        },
+        {
+          "type": "Tower",
+          "frequency": "120.20"
+        },
+        {
+          "type": "Approach",
+          "frequency": "119.10"
+        }
+      ],
+      "services": [
+        "FBO",
+        "Fuel",
+        "Maintenance",
+        "Hangar",
+        "Restaurant"
+      ]
+    },
+    {
+      "icao": "CYUL",
+      "iata": "YUL",
+      "name": "Montreal-Pierre Elliott Trudeau International Airport",
+      "city": "Montreal",
+      "province": "QC",
+      "country": "CA",
+      "latitude": 45.4706,
+      "longitude": -73.7409,
+      "elevation": 36,
+      "elevationFeet": 118,
+      "timezone": "EST",
+      "type": "public",
+      "runways": [
+        {
+          "designation": "06L/24R",
+          "length": 3657,
+          "width": 60,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "06R/24L",
+          "length": 4000,
+          "width": 60,
+          "surface": "Asphalt"
+        }
+      ],
+      "frequencies": [
+        {
+          "type": "ATIS",
+          "frequency": "127.75"
+        },
+        {
+          "type": "Ground",
+          "frequency": "121.75"
+        },
+        {
+          "type": "Tower",
+          "frequency": "118.70"
+        },
+        {
+          "type": "Approach",
+          "frequency": "119.40"
+        }
+      ],
+      "services": [
+        "FBO",
+        "Fuel",
+        "Maintenance",
+        "Hangar",
+        "Restaurant",
+        "Hotel"
+      ]
+    },
+    {
+      "icao": "CYEG",
+      "iata": "YEG",
+      "name": "Edmonton International Airport",
+      "city": "Edmonton",
+      "province": "AB",
+      "country": "CA",
+      "latitude": 53.3091,
+      "longitude": -113.5800,
+      "elevation": 891,
+      "elevationFeet": 2923,
+      "timezone": "MST",
+      "type": "public",
+      "runways": [
+        {
+          "designation": "09/27",
+          "length": 3962,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "03/21",
+          "length": 3658,
+          "width": 61,
+          "surface": "Asphalt"
+        }
+      ],
+      "frequencies": [
+        {
+          "type": "ATIS",
+          "frequency": "126.55"
+        },
+        {
+          "type": "Ground",
+          "frequency": "121.75"
+        },
+        {
+          "type": "Tower",
+          "frequency": "118.10"
+        },
+        {
+          "type": "Approach",
+          "frequency": "119.10"
+        }
+      ],
+      "services": [
+        "FBO",
+        "Fuel",
+        "Maintenance",
+        "Hangar",
+        "Restaurant"
+      ]
+    },
+    {
+      "icao": "CYOW",
+      "iata": "YOW",
+      "name": "Ottawa Macdonald-Cartier International Airport",
+      "city": "Ottawa",
+      "province": "ON",
+      "country": "CA",
+      "latitude": 45.3225,
+      "longitude": -75.6692,
+      "elevation": 114,
+      "elevationFeet": 374,
+      "timezone": "EST",
+      "type": "public",
+      "runways": [
+        {
+          "designation": "07/25",
+          "length": 3000,
+          "width": 61,
+          "surface": "Asphalt"
+        },
+        {
+          "designation": "14/32",
+          "length": 3000,
+          "width": 61,
+          "surface": "Asphalt"
+        }
+      ],
+      "frequencies": [
+        {
+          "type": "ATIS",
+          "frequency": "127.55"
+        },
+        {
+          "type": "Ground",
+          "frequency": "121.80"
+        },
+        {
+          "type": "Tower",
+          "frequency": "118.30"
+        },
+        {
+          "type": "Approach",
+          "frequency": "119.10"
+        }
+      ],
+      "services": [
+        "FBO",
+        "Fuel",
+        "Maintenance",
+        "Hangar",
+        "Restaurant"
+      ]
+    }
+  ]
+}
