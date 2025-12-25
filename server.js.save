@@ -1,0 +1,109 @@
+xzz>>>>>>>Xconst express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+// Mock weather data endpoint
+app.get('/weather', (req, res) => {
+  const station = req.query.station || 'CYYZ';
+  const mockData = [
+    { station, type: 'METAR', report: 'CYYZ 231600Z 28012KT 10SM FEW020 SCT050 BKN100 01/M02 A3012' },
+    { station, type: 'TAF', report: 'CYYZ 231120Z 2312/2412 28012KT P6SM SCT050' },
+  ];
+  res.json(mockData);
+});
+
+// Mock airport data endpoint
+app.get('/airport', (req, res) => {
+  const code = req.query.code || 'CYYZ';
+  const mockAirportData = {
+    name: 'Toronto Pearson International Airport',
+    code,
+    location: 'Mississauga, ON, Canada',
+    runways: [
+      { id: 1, heading: '05/23', length: '11,200 ft', surface: 'Asphalt' },
+      { id: 2, heading: '15/33', length: '9,500 ft', surface: 'Asphalt' },
+    ],
+    frequencies: [
+      { type: 'Tower', freq: '118.7 MHz' },
+      { type: 'Ground', freq: '121.9 MHz' },
+      { type: 'Unicom', freq: '123.0 MHz' },
+    ],
+  };
+  res.json(mockAirportData);
+});
+
+// Mock AI transcription endpoint
+app.post('/ai/transcribe', (req, res) => {
+  const mockTranscription = 'Crosswind component for 20 knots at 30 degrees';
+  res.json({ transcription: mockTranscription });
+});
+
+// Flight calculation endpoint
+app.post('/calc/flight', (req, res) => {
+  const {
+    trueAirspeed,
+    windDirection,
+    windSpeed,
+    trueCourse,
+  } = req.body;
+
+  // Convert degrees to radians
+  const degToRad = (deg) => (deg * Math.PI) / 180;
+  const radToDeg = (rad) => (rad * 180) / Math.PI;
+
+  const windAngle = degToRad(windDirection - trueCourse);
+
+  const wca =
+    radToDeg(
+      Math.asin((windSpeed * Math.sin(windAngle)) / trueAirspeed)
+    ) || 0;
+
+  const groundspeed =
+    trueAirspeed -
+    windSpeed * Math.cos(windAngle);
+
+  res.json({
+    windCorrectionAngle: Number(wca.toFixed(1)),
+    groundSpeed: Number(groundspeed.toFixed(1)),
+  });
+});
+
+// Density altitude endpoint
+app.post('/calc/density-altitude', (req, res) => {
+  const {
+    pressureAltitude,
+    outsideAirTemp,
+  } = req.body;
+
+  const isaTemp = 15 - (pressureAltitude / 1000) * 2;
+  const densityAltitude =
+    pressureAltitude +
+    120 * (outsideAirTemp - isaTemp);
+
+  res.json({
+    densityAltitude: Math.round(densityAltitude),
+  });
+});
+
+// METAR endpoint
+app.get('/metar/:icao', async (req, res) => {
+  const { icao } = req.params;
+
+  // MOCK for now (safe + free)
+  res.json({
+    icao,
+    metar: `${icao} 231800Z 24012KT 10SM FEW020 15/08 A2992`,
+    taf: `${icao} 231740Z 2318/2418 24012KT P6SM SCT020`,
+  });
+});
+
+// Start server
+app.listen(3000, '0.0.0.0', () => {
+  console.log('Server running on port 3000');
+});
