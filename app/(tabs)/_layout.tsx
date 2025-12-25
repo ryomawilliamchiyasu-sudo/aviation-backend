@@ -8,6 +8,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#007AFF',
       }}
     >
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="ai-assist" options={{ title: 'AI Assist' }} />
       <Tabs.Screen name="maps" options={{ title: 'Maps', headerShown: false }} />
       <Tabs.Screen name="weather" options={{ title: 'Weather' }} />
