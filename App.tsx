@@ -30,12 +30,12 @@ export default function App() {
 	const fetchMETAR = async (station: string = 'CYYZ') => {
 		setLoadingMetar(true);
 		try {
-			const response = await fetch(`${BACKEND_URL}/weather?station=${station}`);
+			const response = await fetch(`${BACKEND_URL}/api/weather/metar/${station}`);
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 			const data = await response.json();
-			setMetarData(data);
+			setMetarData(data.data || data);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			setMetarData({ error: message });
