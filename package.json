@@ -2,10 +2,9 @@
   "name": "aviation-backend",
   "version": "1.0.0",
   "description": "Aviation weather and airport information API",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node index.js",
+    "dev": "node server.js",
     "web": "expo start --web",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
