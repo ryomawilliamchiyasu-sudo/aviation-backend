@@ -1,7 +1,7 @@
 {
   "name": "aviation-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Aviation weather and airport information API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

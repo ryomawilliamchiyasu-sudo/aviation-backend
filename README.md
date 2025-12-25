@@ -1,42 +1,50 @@
-# Aviation Backend API
+# Welcome to your Expo app 👋
 
-Backend server for aviation weather and airport information.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Features
+## Get started
 
-- **Weather Data**: Fetches live METAR data from aviationweather.gov
-- **Airport Information**: Mock airport details, runways, and frequencies
-- **AI Transcription**: Mock endpoint for future implementation
-- **CORS Enabled**: Ready for frontend integration
+1. Install dependencies
 
-## API Endpoints
+   ```bash
+   npm install
+   ```
 
-| Endpoint | Method | Parameters | Description |
-|----------|--------|------------|-------------|
-| `/test` | GET | - | Health check |
-| `/weather` | GET | `?station=CYYZ` | Live METAR data |
-| `/airport` | GET | `?code=CYYZ` | Airport info (mock) |
-| `/ai/transcribe` | POST | JSON body | AI transcription (mock) |
+2. Start the app
 
-## Local Development
+   ```bash
+   npx expo start
+   ```
+
+In the output, you'll find options to open the app in a
+
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Get a fresh project
+
+When you're ready, run:
 
 ```bash
-npm install
-npm run dev      # Mock server (index.js)
-npm start        # Production server (server.js)
+npm run reset-project
 ```
 
-## Deployment
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-Deployed on Render: [Your URL will be here]
+## Learn more
 
-## Environment Variables
+To learn more about developing your project with Expo, look at the following resources:
 
-- `PORT`: Server port (default: 3000)
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Tech Stack
+## Join the community
 
-- Node.js
-- Express
-- node-fetch (for API calls)
-- CORS enabled
+Join our community of developers creating universal apps.
+
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
