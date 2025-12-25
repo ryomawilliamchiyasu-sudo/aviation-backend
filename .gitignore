@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+
+# Editor files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+.expo/
+.cache/
+
+# Build files
+dist/
+build/
+
+# Backup files
+*.save
+*.backup
