@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const https = require('https');
 
 class WeatherService {
   // Base URL for aviationweather.gov API
@@ -12,6 +12,35 @@ class WeatherService {
   static validateIcao(icao) {
     if (!icao || typeof icao !== 'string') return false;
     return /^[A-Z]{4}$/.test(icao.toUpperCase());
+  }
+
+  /**
+   * Helper to make HTTPS requests
+   * @private
+   */
+  static _makeRequest(url) {
+    return new Promise((resolve, reject) => {
+      const timeoutHandle = setTimeout(() => {
+        reject(new Error('Request timeout'));
+      }, 10000);
+
+      https.get(url, { headers: { 'User-Agent': 'aviation-backend/1.0' } }, (res) => {
+        clearTimeout(timeoutHandle);
+        let data = '';
+
+        res.on('data', chunk => { data += chunk; });
+        res.on('end', () => {
+          try {
+            resolve({ status: res.statusCode, body: JSON.parse(data) });
+          } catch (e) {
+            reject(new Error('Invalid JSON response'));
+          }
+        });
+      }).on('error', err => {
+        clearTimeout(timeoutHandle);
+        reject(err);
+      });
+    });
   }
 
   /**
@@ -32,25 +61,18 @@ class WeatherService {
       }
 
       const url = `${this.BASE_URL}/metar?ids=${upperIcao}&format=json`;
-      const response = await fetch(url, {
-        timeout: 10000, // 10 second timeout
-        headers: {
-          'User-Agent': 'aviation-backend/1.0'
-        }
-      });
+      const { status, body } = await this._makeRequest(url);
 
-      if (!response.ok) {
+      if (status !== 200) {
         return {
           error: true,
-          message: `Aviation Weather API error: ${response.status}`,
-          status: response.status
+          message: `Aviation Weather API error: ${status}`,
+          status: status
         };
       }
 
-      const data = await response.json();
-
-      // API returns array of results
-      if (!data.Results || data.Results.length === 0) {
+      // API returns array directly
+      if (!Array.isArray(body) || body.length === 0) {
         return {
           error: true,
           message: `No METAR data found for airport ${upperIcao}`,
@@ -58,7 +80,7 @@ class WeatherService {
         };
       }
 
-      const metar = data.Results[0];
+      const metar = body[0];
       return this._formatMetarResponse(metar);
     } catch (error) {
       console.error('METAR fetch error:', error.message);
@@ -88,24 +110,17 @@ class WeatherService {
       }
 
       const url = `${this.BASE_URL}/taf?ids=${upperIcao}&format=json`;
-      const response = await fetch(url, {
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'aviation-backend/1.0'
-        }
-      });
+      const { status, body } = await this._makeRequest(url);
 
-      if (!response.ok) {
+      if (status !== 200) {
         return {
           error: true,
-          message: `Aviation Weather API error: ${response.status}`,
-          status: response.status
+          message: `Aviation Weather API error: ${status}`,
+          status: status
         };
       }
 
-      const data = await response.json();
-
-      if (!data.Results || data.Results.length === 0) {
+      if (!Array.isArray(body) || body.length === 0) {
         return {
           error: true,
           message: `No TAF data found for airport ${upperIcao}`,
@@ -113,7 +128,7 @@ class WeatherService {
         };
       }
 
-      const taf = data.Results[0];
+      const taf = body[0];
       return this._formatTafResponse(taf);
     } catch (error) {
       console.error('TAF fetch error:', error.message);
@@ -132,38 +147,44 @@ class WeatherService {
   static _formatMetarResponse(metar) {
     return {
       icao: metar.icaoId,
-      timestamp: metar.obsTime?.dt || null,
-      rawText: metar.rawText || '',
+      timestamp: metar.reportTime || null,
+      rawText: metar.rawOb || '',
       // Decoded fields
       wind: {
-        direction: metar.wdir?.value || null,
-        speed: metar.wspd?.value || null,
-        gust: metar.wgst?.value || null,
+        direction: metar.wdir || null,
+        speed: metar.wspd || null,
+        gust: metar.wgst || null,
         unit: 'knots'
       },
       visibility: {
-        miles: metar.visibility?.value || null,
-        meters: metar.visibility?.value ? metar.visibility.value * 1609.34 : null,
-        unit: 'miles'
+        miles: metar.visib || null,
+        meters: null,
+        unit: 'statute miles'
       },
       temperature: {
-        celsius: metar.temp?.value || null,
-        fahrenheit: metar.temp?.value ? (metar.temp.value * 9/5) + 32 : null
+        celsius: metar.temp || null,
+        fahrenheit: metar.temp ? (metar.temp * 9/5) + 32 : null
       },
       dewpoint: {
-        celsius: metar.dewp?.value || null,
-        fahrenheit: metar.dewp?.value ? (metar.dewp.value * 9/5) + 32 : null
+        celsius: metar.dewp || null,
+        fahrenheit: metar.dewp ? (metar.dewp * 9/5) + 32 : null
       },
       altimeter: {
-        inchesHg: metar.altim?.value || null,
-        hectopascals: metar.altim?.value ? metar.altim.value * 33.8639 : null
+        inchesHg: metar.altim || null,
+        hectopascals: null
       },
       flightCategory: metar.flightCategory || 'UNKNOWN',
-      // Ceiling - estimate from cloud layers
-      ceiling: this._extractCeiling(metar.clouds),
+      // Ceiling from cloud data
+      ceiling: metar.clouds ? this._extractCeiling(metar.clouds) : null,
       clouds: metar.clouds || [],
       // Other conditions
-      remarks: metar.rmk || null
+      remarks: metar.rmk || null,
+      station: {
+        name: metar.name || '',
+        lat: metar.lat || null,
+        lon: metar.lon || null,
+        elev: metar.elev || null
+      }
     };
   }
 
@@ -174,26 +195,25 @@ class WeatherService {
   static _formatTafResponse(taf) {
     return {
       icao: taf.icaoId,
-      timestamp: taf.issueTime?.dt || null,
+      timestamp: taf.issueTime || null,
       validPeriod: {
-        start: taf.validTimeFrom?.dt || null,
-        end: taf.validTimeTo?.dt || null
+        start: taf.validTimeFrom || null,
+        end: taf.validTimeTo || null
       },
-      rawText: taf.rawText || '',
-      // Forecast groups
+      rawText: taf.rawOb || '',
       forecastGroups: taf.fcstLines ? taf.fcstLines.map(line => ({
         timeRange: {
-          start: line.timeRange?.from?.dt || null,
-          end: line.timeRange?.to?.dt || null
+          start: line.validFrom || null,
+          end: line.validTo || null
         },
         wind: {
-          direction: line.wdir?.value || null,
-          speed: line.wspd?.value || null,
-          gust: line.wgst?.value || null,
+          direction: line.wdir || null,
+          speed: line.wspd || null,
+          gust: line.wgst || null,
           unit: 'knots'
         },
         visibility: {
-          miles: line.visibility?.value || null
+          miles: line.visib || null
         },
         weather: line.weather || [],
         clouds: line.clouds || [],
@@ -213,7 +233,7 @@ class WeatherService {
 
     for (const cloud of clouds) {
       const coverage = cloud.cover || '';
-      const altitude = cloud.base?.value || 0;
+      const altitude = cloud.base || 0;
 
       // Ceiling is the lowest BKN (broken) or OVC (overcast) layer >= 5000 ft
       if (altitude >= 5000 && (coverage === 'BKN' || coverage === 'OVC')) {
