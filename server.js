@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const airportRoutes = require('./src/routes/airportRoutes');
+const weatherRoutes = require('./src/routes/weatherRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,24 +12,10 @@ app.use(express.json());
 
 // Mount routes
 app.use('/api/airports', airportRoutes);
+app.use('/api/weather', weatherRoutes);
 
 app.get('/test', (_req, res) => {
   res.json({ ok: true, message: 'API alive' });
-});
-
-app.get('/weather', (req, res) => {
-  const station = (req.query.station || 'CYYZ').toString().toUpperCase();
-  const now = new Date().toISOString();
-
-  // Mock METAR-like payload for local testing
-  res.json({
-    station,
-    raw_text: `METAR ${station} 121200Z 24005KT 10SM FEW020 SCT080 20/12 A2992 RMK AO2`,
-    issued_at: now,
-    wind_kt: 5,
-    visibility_sm: 10,
-    temp_c: 20,
-  });
 });
 
 // AI endpoint - secure server-side processing
