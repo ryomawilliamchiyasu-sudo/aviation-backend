@@ -1,8 +1,8 @@
 const { Server } = require('socket.io');
-const { transcribeAudio } = require('./services/transcriptionService');
+const { handleAudioChunk } = require('./services/streamingTranscription');
 
 /**
- * Setup WebSocket with Socket.io for real-time audio transcription
+ * Setup WebSocket with Socket.io for real-time audio transcription using Whisper API
  * @param {http.Server} server - HTTP server instance
  */
 function setupWebSocket(server) {
@@ -19,43 +19,48 @@ function setupWebSocket(server) {
       ],
       methods: ['GET', 'POST'],
       credentials: true
-    }
+    },
+    maxHttpBufferSize: 10 * 1024 * 1024 // Allow 10MB audio chunks
   });
+
+  // Track active sessions
+  const sessions = new Map();
 
   io.on('connection', (socket) => {
     console.log(`🎤 Pilot connected: ${socket.id}`);
+    sessions.set(socket.id, {
+      startTime: new Date(),
+      chunks: 0,
+      callsign: null
+    });
 
     /**
-     * Receive audio chunk and transcribe
+     * Receive audio chunk and transcribe with Whisper API
      * Event: 'audio-chunk'
-     * Data: { buffer: Uint8Array, format: 'wav'|'mp3'|'webm' }
+     * Data: { buffer: Uint8Array|string, format: 'wav'|'mp3'|'webm' }
      */
     socket.on('audio-chunk', async (data) => {
       try {
-        const { buffer, format } = data;
+        const session = sessions.get(socket.id);
+        if (session) {
+          session.chunks++;
+        }
+
+        const { buffer, format = 'wav' } = data;
         
         if (!buffer) {
-          socket.emit('error', { message: 'No audio buffer provided' });
+          socket.emit('transcript-error', { message: 'No audio buffer provided' });
           return;
         }
 
-        console.log(`📨 Received audio chunk from ${socket.id} (${format})`);
+        console.log(`📨 Received audio chunk from ${socket.id} - chunk #${session.chunks} (${format})`);
 
-        // Transcribe audio
-        const result = await transcribeAudio(buffer, format);
-
-        // Emit results back to pilot
-        socket.emit('transcript', {
-          rawText: result.text,
-          highlights: result.highlights,
-          confidence: result.confidence,
-          timestamp: new Date().toISOString()
-        });
-
-        console.log(`✓ Transcribed: "${result.text}"`);
+        // Send to Whisper API for real transcription
+        await handleAudioChunk(buffer, socket, format);
+        
       } catch (error) {
-        console.error('Transcription error:', error.message);
-        socket.emit('error', { 
+        console.error('Audio transcription error:', error.message);
+        socket.emit('transcript-error', { 
           message: 'Transcription failed',
           error: error.message 
         });
@@ -66,11 +71,18 @@ function setupWebSocket(server) {
      * Start continuous transcription session
      * Event: 'start-session'
      */
-    socket.on('start-session', (data) => {
-      const { callsign } = data || {};
+    socket.on('start-session', (data = {}) => {
+      const { callsign } = data;
+      const session = sessions.get(socket.id);
+      if (session) {
+        session.startTime = new Date();
+        session.chunks = 0;
+        session.callsign = callsign || null;
+      }
       console.log(`🔴 Recording started - Callsign: ${callsign || 'unknown'}`);
       socket.emit('session-started', { 
         sessionId: socket.id,
+        callsign: callsign || null,
         timestamp: new Date().toISOString()
       });
     });
@@ -80,8 +92,11 @@ function setupWebSocket(server) {
      * Event: 'end-session'
      */
     socket.on('end-session', () => {
-      console.log(`⏹️  Recording ended for ${socket.id}`);
+      const session = sessions.get(socket.id);
+      console.log(`⏹️  Recording ended for ${socket.id} - Chunks: ${session?.chunks || 0}`);
       socket.emit('session-ended', {
+        sessionId: socket.id,
+        chunksProcessed: session?.chunks || 0,
         timestamp: new Date().toISOString()
       });
     });
@@ -98,7 +113,9 @@ function setupWebSocket(server) {
      * Handle disconnect
      */
     socket.on('disconnect', () => {
-      console.log(`👋 Pilot disconnected: ${socket.id}`);
+      const session = sessions.get(socket.id);
+      console.log(`👋 Pilot disconnected: ${socket.id} - Session: ${session?.chunks || 0} chunks`);
+      sessions.delete(socket.id);
     });
 
     /**
