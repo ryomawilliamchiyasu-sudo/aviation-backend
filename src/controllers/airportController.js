@@ -34,7 +34,9 @@ class AirportController {
           iata: airport.iata,
           name: airport.name,
           city: airport.city,
-          province: airport.province
+          province: airport.province,
+          latitude: airport.latitude,
+          longitude: airport.longitude
         }))
       });
     } catch (error) {
@@ -98,6 +100,8 @@ class AirportController {
           name: airport.name,
           city: airport.city,
           province: airport.province,
+          latitude: airport.latitude,
+          longitude: airport.longitude,
           elevation: airport.elevationFeet
         }))
       });
@@ -139,7 +143,10 @@ class AirportController {
           icao: airport.icao,
           iata: airport.iata,
           name: airport.name,
-          city: airport.city
+          city: airport.city,
+          latitude: airport.latitude,
+          longitude: airport.longitude,
+          elevation: airport.elevationFeet
         }))
       });
     } catch (error) {
