@@ -1,50 +1,175 @@
-# Welcome to your Expo app 👋
+# Aviation Backend API
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A Node.js/Express API backend for the Electronic Aviation Book (EAB) application.
 
-## Get started
+## 🚀 Quick Start
 
-1. Install dependencies
+### Prerequisites
+- Node.js 18+
+- npm
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Installation
 
 ```bash
-npm run reset-project
+cd /Users/ryoma/aviation-backend
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Running Locally
 
-## Learn more
+```bash
+npm start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Backend runs on `http://localhost:3000`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Environment Variables
 
-## Join the community
+Create a `.env` file:
 
-Join our community of developers creating universal apps.
+```env
+PORT=3000
+OPENAI_API_KEY=your_key_here
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📁 Project Structure
+
+```
+aviation-backend/
+├── server.js              # Main Express app
+├── src/
+│   ├── routes/           # API routes
+│   ├── controllers/      # Request handlers
+│   └── services/         # Business logic
+├── package.json          # Backend dependencies ONLY
+├── .env                  # Environment variables (NOT in git)
+└── API_*.md             # Endpoint documentation
+```
+
+## 🔌 API Endpoints
+
+### Health Check
+```
+GET /test                                    → {"ok":true,"message":"API alive"}
+GET /                                        → API documentation
+```
+
+### Weather
+```
+GET /api/weather/metar/:icao                 → Current conditions (METAR)
+GET /api/weather/taf/:icao                   → Forecast (TAF)
+GET /api/weather/:icao                       → Combined weather
+```
+
+### Airports
+```
+GET /api/airports/search?q=query             → Search airports
+GET /api/airports/:icao                      → Airport details
+GET /api/airports/province/:code             → Filter by province
+GET /api/airports                            → All airports
+```
+
+### AI
+```
+POST /ai/ask                                 → AI prompt processing
+```
+
+See [API_WEATHER.md](API_WEATHER.md) and [API_AIRPORTS.md](API_AIRPORTS.md) for details.
+
+## 📦 Dependencies (Backend Only)
+
+- **express** - Web framework
+- **cors** - Cross-Origin Resource Sharing
+- **body-parser** - Request parsing
+- **dotenv** - Environment management
+- **openai** - AI integration
+
+## 🔗 Frontend Connection
+
+This is a **backend-only** repository. The frontend is at `/Users/ryoma/my-first-app`
+
+### How Frontend Connects
+
+The frontend's `config.ts` specifies this backend's URL:
+
+```typescript
+// my-first-app/config.ts
+const USE_LOCAL = false;  // true = localhost:3000, false = production
+const PRODUCTION_URL = 'https://aviation-backend-ccw5.onrender.com';
+const LOCAL_URL = 'http://localhost:3000';
+export const BACKEND_URL = USE_LOCAL ? LOCAL_URL : PRODUCTION_URL;
+```
+
+### Development Workflow
+
+**Terminal 1 - Start Backend:**
+```bash
+cd /Users/ryoma/aviation-backend
+npm start
+# Runs on http://localhost:3000
+```
+
+**Terminal 2 - Start Frontend:**
+```bash
+cd /Users/ryoma/my-first-app
+npm run web
+# Runs on http://localhost:8081
+# Set USE_LOCAL = true in config.ts to use local backend
+```
+
+## 🌐 Deployment
+
+**Production Backend**: https://aviation-backend-ccw5.onrender.com (auto-deployed on git push)
+
+## 🏗️ Architecture
+
+```
+Frontend (my-first-app) → HTTP Requests → Backend (aviation-backend) → External APIs
+   :8081                    CORS enabled      :3000 (local)           aviationweather.gov
+                          JSON responses                               OpenAI API
+```
+
+## 📚 Documentation
+
+- [EAB_SPECIFICATION.md](EAB_SPECIFICATION.md) - Complete project specification
+- [API_WEATHER.md](API_WEATHER.md) - Weather endpoints documentation
+- [API_AIRPORTS.md](API_AIRPORTS.md) - Airport endpoints documentation
+- [SETUP.md](SETUP.md) - Initial setup instructions
+- [DEPLOY.md](DEPLOY.md) - Deployment guide
+
+## 🔧 Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm start` | Start the backend server |
+| `npm run dev` | Start with watch mode |
+| `npm test` | Run tests |
+
+## 🛡️ Security
+
+- ✅ API keys in `.env` (never committed)
+- ✅ CORS configured for frontend
+- ✅ Server-side AI processing (keys protected)
+- ✅ Input validation on endpoints
+
+## 🐛 Troubleshooting
+
+**Backend won't start?**
+```bash
+lsof -i :3000 | grep -v COMMAND | awk '{print $2}' | xargs kill -9
+npm start
+```
+
+**Frontend can't reach backend?**
+1. Verify `config.ts` in my-first-app has correct URL
+2. Set `USE_LOCAL = true` for local dev
+3. Check backend is running: `curl http://localhost:3000/test`
+
+**Weather API not working?**
+```bash
+curl http://localhost:3000/api/weather/metar/CYYZ
+```
+
+## 📝 License
+
+ISC
