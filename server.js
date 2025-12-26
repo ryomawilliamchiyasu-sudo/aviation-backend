@@ -1,11 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 const airportRoutes = require('./src/routes/airportRoutes');
 const weatherRoutes = require('./src/routes/weatherRoutes');
+const { setupWebSocket } = require('./src/websocket');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 
 // CORS configuration - allow localhost:8082 (Expo web dev) and any HTTPS origin
 const corsOptions = {
@@ -204,9 +208,14 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+// Setup WebSocket for audio transcription
+setupWebSocket(server);
+
+// Start server
+server.listen(PORT, () => {
   console.log(`Backend listening on http://localhost:${PORT}`);
   console.log(`Health check: GET /health`);
   console.log(`Weather: GET /api/weather/:icao`);
   console.log(`AI: POST /ai/ask`);
+  console.log(`WebSocket: ws://localhost:${PORT} (audio transcription)`);
 });
