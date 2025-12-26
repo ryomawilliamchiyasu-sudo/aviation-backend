@@ -7,8 +7,19 @@ const weatherRoutes = require('./src/routes/weatherRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS configuration
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Ensure JSON responses only
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
 
 // Mount routes
 app.use('/api/airports', airportRoutes);
@@ -33,11 +44,17 @@ app.get('/', (_req, res) => {
         combined: 'GET /api/weather/:icao'
       },
       ai: 'POST /ai/ask',
-      health: 'GET /test'
+      health: 'GET /health'
     }
   });
 });
 
+// Health check endpoint
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// Legacy test endpoint (deprecated, use /health)
 app.get('/test', (_req, res) => {
   res.json({ ok: true, message: 'API alive' });
 });
