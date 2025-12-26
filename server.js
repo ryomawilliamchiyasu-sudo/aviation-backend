@@ -15,9 +15,13 @@ const server = http.createServer(app);
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
+      'http://localhost:8084',      // Expo dev (main)
       'http://localhost:8082',      // Expo web dev
       'http://localhost:8081',      // Expo web fallback
       'http://localhost:3000',      // Local backend
+      'http://127.0.0.1:8084',
+      'http://127.0.0.1:8082',
+      'http://127.0.0.1:8081',
       /^https:\/\/.*\.vercel\.app$/,
       /^https:\/\/.*\.netlify\.app$/,
       /^https:\/\/.*\.onrender\.com$/
