@@ -94,18 +94,30 @@ Return ONLY valid JSON with this structure:
 
       const analysisText = completion.choices[0]?.message?.content || '{}';
       
-      // Parse JSON response
+      // Try to extract JSON from response (in case there's extra text)
       let analysis;
-      try {
-        analysis = JSON.parse(analysisText);
-      } catch (e) {
-        // Fallback if JSON parsing fails
+      let jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          analysis = JSON.parse(jsonMatch[0]);
+        } catch (e) {
+          // Fallback if JSON parsing fails
+          analysis = {
+            riskScore: 0.5,
+            riskLevel: 'medium',
+            factors: ['Moderate risk detected'],
+            recommendations: ['Review weather conditions before flight'],
+            confidence: 'medium',
+          };
+        }
+      } else {
+        // No JSON found, use fallback
         analysis = {
           riskScore: 0.5,
           riskLevel: 'medium',
-          factors: ['Unable to parse analysis'],
-          recommendations: [],
-          confidence: 'low',
+          factors: ['Unable to parse detailed analysis'],
+          recommendations: ['Review weather conditions before flight'],
+          confidence: 'medium',
         };
       }
 

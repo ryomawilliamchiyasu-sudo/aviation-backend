@@ -37,11 +37,21 @@ function normalizeMetar(rawMetar) {
     i++;
   }
 
-  // Wind
-  if (i < parts.length && /^\d{3}\d{2}(G\d{2})?KT$/.test(parts[i])) {
-    const windMatch = parts[i].match(/^(\d{3})(\d{2})(?:G(\d{2}))?KT$/);
+  // Wind - Check for variable wind indicator (VRBxxKT) or standard (DDDSSKt or DDDSSGGKt)
+  // Also skip wind direction if it's a letter code (like "CCA")
+  if (i < parts.length && /^[A-Z]{3}$/.test(parts[i]) && (i + 1) < parts.length && /^(VRB|\d{3})\d{2}(G\d{2})?KT$/.test(parts[i + 1])) {
+    // Skip variable wind indicator like "CCA" and get the next part
+    i++;
+  }
+  
+  if (i < parts.length && /^(VRB|\d{3})\d{2}(G\d{2})?KT$/.test(parts[i])) {
+    const windMatch = parts[i].match(/^(VRB|\d{3})(\d{2})(?:G(\d{2}))?KT$/);
     if (windMatch) {
-      normalized.wind.direction = parseInt(windMatch[1]);
+      if (windMatch[1] === 'VRB') {
+        normalized.wind.direction = null; // Variable
+      } else {
+        normalized.wind.direction = parseInt(windMatch[1]);
+      }
       normalized.wind.speed = parseInt(windMatch[2]);
       if (windMatch[3]) normalized.wind.gust = parseInt(windMatch[3]);
     }

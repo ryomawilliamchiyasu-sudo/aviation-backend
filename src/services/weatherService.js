@@ -1,4 +1,6 @@
 const https = require('https');
+const { normalizeMetar, normalizeTaf } = require('../normalizers/aviationDataNormalizer');
+const { cache } = require('../cache/cacheManager');
 
 class WeatherService {
   // Base URL for aviationweather.gov API
@@ -60,6 +62,13 @@ class WeatherService {
         };
       }
 
+      // Check cache first
+      const cachedMetar = cache.getMetar(upperIcao);
+      if (cachedMetar) {
+        console.log(`📊 Using cached METAR for ${upperIcao}`);
+        return cachedMetar;
+      }
+
       const url = `${this.BASE_URL}/metar?ids=${upperIcao}&format=json`;
       const { status, body } = await this._makeRequest(url);
 
@@ -81,7 +90,12 @@ class WeatherService {
       }
 
       const metar = body[0];
-      return this._formatMetarResponse(metar);
+      const formatted = this._formatMetarResponse(metar);
+      
+      // Cache the formatted (already-normalized) data
+      cache.cacheMetar(upperIcao, formatted);
+      
+      return formatted;
     } catch (error) {
       console.error('METAR fetch error:', error.message);
       return {

@@ -293,7 +293,7 @@ app.post('/ai/ask-enhanced', async (req, res) => {
 // AI Flight Analysis endpoint - reasoning with real data
 app.post('/ai/analyze-flight', async (req, res) => {
   try {
-    const { departure, destination, altitude, aircraft, departureTime, metar, taf, notams } = req.body;
+    const { departure, destination, altitude, aircraft, departureTime } = req.body;
     
     // Validate required fields
     if (!departure || !destination) {
@@ -308,18 +308,26 @@ app.post('/ai/analyze-flight', async (req, res) => {
       return res.status(429).json({ error: 'Too many requests. Please try again in a moment.' });
     }
 
+    const WeatherService = require('./src/services/weatherService');
     const FlightAnalysisService = require('./src/services/flightAnalysisService');
     
-    // Perform flight analysis
+    // Automatically fetch METAR and TAF for both airports
+    console.log(`📡 Fetching weather data for ${departure} and ${destination}...`);
+    const [depWeather, destWeather] = await Promise.all([
+      WeatherService.getCombined(departure),
+      WeatherService.getCombined(destination)
+    ]);
+
+    // Perform flight analysis with real data
     const analysis = await FlightAnalysisService.analyzeFlightRisk({
       departure,
       destination,
       altitude,
       aircraft,
       departureTime,
-      metarData: metar,
-      tafData: taf,
-      notamData: notams,
+      metarData: depWeather.metar,
+      tafData: destWeather.taf,
+      notamData: [], // NOTAMs would come from separate service
     });
 
     console.log(`✅ Flight analysis: ${departure} → ${destination} (Risk: ${analysis.riskLevel})`);
@@ -327,6 +335,18 @@ app.post('/ai/analyze-flight', async (req, res) => {
     res.json({
       status: 'ok',
       analysis: analysis,
+      weather: {
+        departure: {
+          icao: departure,
+          metar: depWeather.metar?.normalized || depWeather.metar,
+          taf: destWeather.taf?.normalized || destWeather.taf,
+        },
+        destination: {
+          icao: destination,
+          metar: destWeather.metar?.normalized || destWeather.metar,
+          taf: destWeather.taf?.normalized || destWeather.taf,
+        }
+      },
       timestamp: new Date().toISOString(),
     });
 
