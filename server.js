@@ -7,12 +7,32 @@ const weatherRoutes = require('./src/routes/weatherRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// CORS configuration - allow localhost:8082 (Expo web dev) and any HTTPS origin
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:8082',      // Expo web dev
+      'http://localhost:8081',      // Expo web fallback
+      'http://localhost:3000',      // Local backend
+      /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.netlify\.app$/,
+      /^https:\/\/.*\.onrender\.com$/
+    ];
+    
+    if (!origin || allowedOrigins.some(allowed => 
+      typeof allowed === 'string' ? allowed === origin : allowed.test(origin)
+    )) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'), false);
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Ensure JSON responses only
@@ -20,6 +40,26 @@ app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   next();
 });
+
+// Simple in-memory rate limiting for AI endpoint
+const requestCounts = new Map();
+function checkRateLimit(key, limit = 10, windowMs = 60000) {
+  const now = Date.now();
+  if (!requestCounts.has(key)) {
+    requestCounts.set(key, []);
+  }
+  
+  let times = requestCounts.get(key);
+  times = times.filter(t => now - t < windowMs);
+  
+  if (times.length >= limit) {
+    return false;
+  }
+  
+  times.push(now);
+  requestCounts.set(key, times);
+  return true;
+}
 
 // Mount routes
 app.use('/api/airports', airportRoutes);
@@ -64,8 +104,26 @@ app.post('/ai/ask', async (req, res) => {
   try {
     const { prompt } = req.body;
     
+    // Validate prompt
     if (!prompt || !prompt.trim()) {
       return res.status(400).json({ error: 'Prompt is required' });
+    }
+    
+    const promptTrimmed = prompt.trim();
+    
+    // Cap prompt length (2-4k characters)
+    const MAX_PROMPT_LENGTH = 4000;
+    if (promptTrimmed.length > MAX_PROMPT_LENGTH) {
+      return res.status(400).json({ 
+        error: `Prompt exceeds maximum length of ${MAX_PROMPT_LENGTH} characters`,
+        received: promptTrimmed.length
+      });
+    }
+    
+    // Rate limiting - 10 requests per 60 seconds per IP
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    if (!checkRateLimit(clientIp, 10, 60000)) {
+      return res.status(429).json({ error: 'Too many requests. Please try again in a moment.' });
     }
 
     const openaiKey = process.env.OPENAI_API_KEY;
@@ -78,7 +136,7 @@ app.post('/ai/ask', async (req, res) => {
     
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: promptTrimmed }],
       max_tokens: 500,
     });
 
@@ -87,6 +145,12 @@ app.post('/ai/ask', async (req, res) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('AI error:', message);
+    
+    // Handle rate limit errors from OpenAI
+    if (message.includes('rate_limit')) {
+      return res.status(429).json({ error: 'OpenAI API rate limited. Please try again shortly.' });
+    }
+    
     res.status(500).json({ error: `AI processing failed: ${message}` });
   }
 });
@@ -96,6 +160,19 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
+// 404 handler - return JSON instead of HTML
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Not Found',
+    message: `Route ${req.method} ${req.path} does not exist`,
+    path: req.path,
+    method: req.method
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Backend listening on http://localhost:${PORT}`);
+  console.log(`Health check: GET /health`);
+  console.log(`Weather: GET /api/weather/:icao`);
+  console.log(`AI: POST /ai/ask`);
 });
