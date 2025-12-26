@@ -118,9 +118,52 @@ app.get('/', (_req, res) => {
   });
 });
 
-// Health check endpoint
+// Health check endpoint - enhanced for Render deployment
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+  const health = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+    services: {
+      weather: 'operational',
+      airports: 'operational',
+      ai: process.env.OPENAI_API_KEY ? 'operational' : 'unconfigured',
+      websocket: 'operational',
+      cache: 'operational'
+    },
+    checks: {
+      memoryUsage: {
+        heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB',
+        heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + 'MB'
+      },
+      apiKey: {
+        openai: !!process.env.OPENAI_API_KEY
+      }
+    }
+  };
+  res.json(health);
+});
+
+// Version endpoint - for deployment tracking
+app.get('/version', (_req, res) => {
+  res.json({
+    service: 'Aviation Backend',
+    version: '2.0.0',
+    features: [
+      'REST API (Weather, Airports, AI)',
+      'Real-time Audio Transcription (Whisper)',
+      'Flight Analysis & Risk Assessment',
+      'Data Normalization & Caching',
+      'Enhanced AI with Real Data Context'
+    ],
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    deployment: {
+      platform: 'Render',
+      region: process.env.REGION || 'us-east-1'
+    }
+  });
 });
 
 // Legacy test endpoint (deprecated, use /health)
@@ -181,6 +224,119 @@ app.post('/ai/ask', async (req, res) => {
     }
     
     res.status(500).json({ error: `AI processing failed: ${message}` });
+  }
+});
+
+// Enhanced AI endpoint - with real aviation data context
+app.post('/ai/ask-enhanced', async (req, res) => {
+  try {
+    const { prompt, icao, query } = req.body;
+    
+    // Validate prompt
+    if (!prompt || !prompt.trim()) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
+    
+    const promptTrimmed = prompt.trim();
+    
+    // Cap prompt length
+    const MAX_PROMPT_LENGTH = 4000;
+    if (promptTrimmed.length > MAX_PROMPT_LENGTH) {
+      return res.status(400).json({ 
+        error: `Prompt exceeds maximum length of ${MAX_PROMPT_LENGTH} characters`,
+        received: promptTrimmed.length
+      });
+    }
+    
+    // Rate limiting
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    if (!checkRateLimit(clientIp, 10, 60000)) {
+      return res.status(429).json({ error: 'Too many requests. Please try again in a moment.' });
+    }
+
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (!openaiKey) {
+      return res.status(500).json({ error: 'OpenAI API key not configured on server' });
+    }
+
+    const AIEnhanced = require('./src/services/aiEnhancedService');
+    
+    // Build context options
+    const options = {};
+    if (icao) options.icao = icao;
+    if (query) options.query = query;
+    
+    // Get response with real data context
+    const response = await AIEnhanced.processWithContext(promptTrimmed, options);
+    
+    console.log(`✅ Enhanced AI response for: "${promptTrimmed.substring(0, 50)}..."`);
+    res.json({ 
+      response: response,
+      sources: {
+        weather: icao ? `Weather data for ${icao}` : null,
+        airports: query ? `Airport search: ${query}` : null
+      }
+    });
+    
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Enhanced AI error:', message);
+    
+    if (message.includes('rate_limit')) {
+      return res.status(429).json({ error: 'OpenAI API rate limited. Please try again shortly.' });
+    }
+    
+    res.status(500).json({ error: `AI processing failed: ${message}` });
+  }
+});
+
+// AI Flight Analysis endpoint - reasoning with real data
+app.post('/ai/analyze-flight', async (req, res) => {
+  try {
+    const { departure, destination, altitude, aircraft, departureTime, metar, taf, notams } = req.body;
+    
+    // Validate required fields
+    if (!departure || !destination) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: departure, destination' 
+      });
+    }
+
+    // Rate limiting
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    if (!checkRateLimit(clientIp, 10, 60000)) {
+      return res.status(429).json({ error: 'Too many requests. Please try again in a moment.' });
+    }
+
+    const FlightAnalysisService = require('./src/services/flightAnalysisService');
+    
+    // Perform flight analysis
+    const analysis = await FlightAnalysisService.analyzeFlightRisk({
+      departure,
+      destination,
+      altitude,
+      aircraft,
+      departureTime,
+      metarData: metar,
+      tafData: taf,
+      notamData: notams,
+    });
+
+    console.log(`✅ Flight analysis: ${departure} → ${destination} (Risk: ${analysis.riskLevel})`);
+    
+    res.json({
+      status: 'ok',
+      analysis: analysis,
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Flight analysis error:', message);
+    res.status(500).json({ 
+      error: 'Flight analysis failed',
+      message: message 
+    });
   }
 });
 
