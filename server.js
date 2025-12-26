@@ -35,9 +35,30 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`📝 ${req.method} ${req.path}`);
+  
+  // Log response when it finishes
+  res.on('finish', () => {
+    console.log(`   → ${res.statusCode} ${req.path}`);
+  });
+  
+  next();
+});
+
 // Ensure JSON responses only
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
+  
+  // Override default error handler to always return JSON
+  const originalJson = res.json;
+  res.json = function(data) {
+    // Make sure Content-Type is set
+    this.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return originalJson.call(this, data);
+  };
+  
   next();
 });
 
@@ -155,18 +176,31 @@ app.post('/ai/ask', async (req, res) => {
   }
 });
 
+// Global error handler (must be before 404 handler)
 app.use((err, _req, res, _next) => {
-  console.error('Unexpected error:', err);
-  res.status(500).json({ error: 'Internal Server Error' });
+  console.error('🔴 Server Error:', {
+    message: err.message,
+    status: err.status || 500,
+    path: _req.path,
+    method: _req.method
+  });
+  
+  res.status(err.status || 500).json({ 
+    error: 'Internal Server Error',
+    message: err.message || 'An unexpected error occurred',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // 404 handler - return JSON instead of HTML
 app.use((req, res) => {
+  console.warn('⚠️  404 Not Found:', req.method, req.path);
   res.status(404).json({ 
     error: 'Not Found',
     message: `Route ${req.method} ${req.path} does not exist`,
     path: req.path,
-    method: req.method
+    method: req.method,
+    timestamp: new Date().toISOString()
   });
 });
 

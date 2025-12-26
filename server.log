@@ -1,0 +1,24 @@
+[dotenv@17.2.3] injecting env (1) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+Backend listening on http://localhost:3000
+Health check: GET /health
+Weather: GET /api/weather/:icao
+AI: POST /ai/ask
+📝 GET /health
+   → 200 /health
+📝 GET /health
+   → 200 /health
+📝 GET /health
+   → 200 /health
+📝 GET /api/weather/cyyz
+   → 200 /cyyz
+📝 GET /api/weather/metar/cyyz
+   → 200 /metar/cyyz
+📝 GET /api/airports
+   → 200 /
+📝 GET /api/airports/search
+   → 200 /search
+📝 GET /api/airports/cyyz
+   → 200 /cyyz
+📝 GET /api/invalid
+⚠️  404 Not Found: GET /api/invalid
+   → 404 /api/invalid
