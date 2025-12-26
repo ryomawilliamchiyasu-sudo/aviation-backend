@@ -22,3 +22,128 @@ AI: POST /ai/ask
 📝 GET /api/invalid
 ⚠️  404 Not Found: GET /api/invalid
    → 404 /api/invalid
+📝 GET /health
+   → 200 /health
+📝 GET /api/weather/cyyz
+   → 200 /cyyz
+📝 GET /api/weather/metar/cyyz
+   → 200 /metar/cyyz
+📝 GET /api/airports
+   → 200 /
+📝 GET /api/airports/search
+   → 200 /search
+📝 GET /api/airports/cyyz
+   → 200 /cyyz
+📝 GET /api/invalid
+⚠️  404 Not Found: GET /api/invalid
+   → 404 /api/invalid
+📝 GET /api/weather/x
+   → 400 /x
+📝 GET /api/weather/toolong
+   → 400 /toolong
+📝 GET /api/weather/123
+   → 400 /123
+📝 GET /api/airports/search
+   → 400 /search
+📝 GET /api/airports/search
+   → 400 /search
+📝 GET /api/airports/search
+   → 400 /search
+📝 GET /api/airports/ZZZZ
+   → 404 /ZZZZ
+📝 GET /api/airports/search
+   → 200 /search
+📝 GET /api/airports/cyyz
+   → 200 /cyyz
+📝 GET /api/airports/CYYZ
+   → 200 /CYYZ
+📝 GET /api/airports/search
+   → 200 /search
+📝 GET /api/airports/search
+   → 200 /search
+📝 POST /ai/ask
+   → 400 /ai/ask
+📝 POST /ai/ask
+   → 400 /ai/ask
+📝 POST /ai/ask
+   → 400 /ai/ask
+📝 GET /api/weather
+⚠️  404 Not Found: GET /api/weather
+   → 404 /api/weather
+📝 GET /api/airports/province
+   → 404 /province
+📝 GET /health
+   → 200 /health
+📝 GET /api/weather/xyz
+   → 400 /xyz
+📝 GET /api/weather/x
+   → 400 /x
+📝 GET /api/weather/toolong
+   → 400 /toolong
+📝 GET /api/weather/123
+   → 400 /123
+📝 GET /api/airports/search
+   → 400 /search
+📝 GET /api/airports/search
+   → 400 /search
+📝 GET /api/airports/search
+   → 400 /search
+📝 GET /api/airports/ZZZZ
+   → 404 /ZZZZ
+📝 GET /api/airports/search
+   → 200 /search
+📝 GET /api/airports/cyyz
+   → 200 /cyyz
+📝 GET /api/airports/CYYZ
+   → 200 /CYYZ
+📝 GET /api/airports/search
+   → 200 /search
+📝 GET /api/airports/search
+   → 200 /search
+📝 POST /ai/ask
+   → 400 /ai/ask
+📝 POST /ai/ask
+   → 400 /ai/ask
+📝 POST /ai/ask
+   → 400 /ai/ask
+📝 GET /api/weather
+⚠️  404 Not Found: GET /api/weather
+   → 404 /api/weather
+📝 GET /api/airports/province
+   → 404 /province
+📝 GET /health
+   → 200 /health
+📝 GET /api/weather/xyz
+   → 400 /xyz
+📝 GET /api/weather/cyyz
+   → 200 /cyyz
+📝 GET /api/airports
+   → 200 /
+📝 GET /api/weather/cyyz
+   → 200 /cyyz
+📝 GET /api/airports
+   → 200 /
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
+📝 POST /ai/ask
+AI error: 401 Incorrect API key provided: sk-proj-*************HERE. You can find your API key at https://platform.openai.com/account/api-keys.
+   → 500 /ai/ask
